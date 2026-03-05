@@ -12,22 +12,23 @@ export default function App() {
       alignItems: "center"
     }}>
       <h1 style={{ color: "#0f2560", marginBottom: "20px", fontSize: "3rem" }}>
-        QR Code Generator
+        👋 QR Code Generator
       </h1>
       <p style={{ color: "#666", marginBottom: "30px", fontSize: "18px", maxWidth: "500px" }}>
-        The application is loading... If you see this message, React is working correctly!
+        Hello! This is a React application displaying correctly from Vite and GitHub Pages.
       </p>
-      <div style={{
-        display: "inline-block",
-        padding: "20px 40px",
+      <button onClick={() => alert('Button works!')} style={{
+        padding: "12px 24px",
         background: "linear-gradient(135deg, #1a3a8f, #1565c0)",
         color: "white",
+        border: "none",
         borderRadius: "8px",
         fontWeight: "600",
-        fontSize: "16px"
+        fontSize: "16px",
+        cursor: "pointer"
       }}>
-        ✓ React is mounted and working
-      </div>
+        Click Me - If you see this, React is working!
+      </button>
     </div>
   );
 }
