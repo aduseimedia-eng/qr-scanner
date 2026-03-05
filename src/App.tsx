@@ -623,12 +623,28 @@ export default function App() {
       let logoArea = null;
       if (logo && tab === "url") {
         const lx = canvasSize/2 - 24, ly = canvasSize/2 - 24;
-        logoArea = { x: lx - 4, y: ly - 4, w: 56, h: 56 };
-        // Save the area behind where logo will go (before frame is drawn)
+        logoArea = { x: lx - 4, y: ly - 4, w: 56, h: 56, cx: canvasSize/2, cy: canvasSize/2, r: 32 };
       }
       
-      // Step 3B: Draw frame on TOP after QR code (but avoid logo area)
-      if (hasFrame) {
+      // Step 3B: Draw frame on TOP after QR code (with clipping to avoid logo area)
+      if (hasFrame && logoArea) {
+        // Save canvas state
+        ctx.save();
+        
+        // Create clipping path that excludes the circular logo area
+        // Draw outer rect, then the inner circle (which will be excluded due to evenodd rule)
+        const path = new Path2D();
+        path.rect(0, 0, canvasSize, canvasSize);
+        path.arc(logoArea.cx, logoArea.cy, logoArea.r, 0, Math.PI * 2);
+        ctx.clip(path, "evenodd");
+        
+        // Now draw frame - it won't go in the logo area due to clipping
+        drawFrame(ctx, frame, canvasSize, frameColor, qrSize);
+        
+        // Restore canvas state
+        ctx.restore();
+      } else if (hasFrame) {
+        // No logo, draw frame normally
         drawFrame(ctx, frame, canvasSize, frameColor, qrSize);
       }
       
