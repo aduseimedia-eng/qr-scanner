@@ -1,4 +1,6 @@
-export default function App() {
+import { FC } from 'react';
+
+const App: FC = () => {
   return (
     <div style={{
       padding: "40px",
@@ -31,4 +33,6 @@ export default function App() {
       </button>
     </div>
   );
-}
+};
+
+export default App;
