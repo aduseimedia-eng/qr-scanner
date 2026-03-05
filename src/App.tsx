@@ -233,57 +233,56 @@ const FRAMES = [
 //   { id:"gradient", name:"Gradient", icon:"⛅" },
 // ];
 
-function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: string = "#1a3a8f") {
+function drawFrame(ctx: any, frameType: string, size: number = 290, frameColor: string = "#1a3a8f", qrSize: number = 220) {
   if (frameType === "none") return;
   
   const w = size, h = size;
-  const pad = 8;
+  const margin = (size - qrSize) / 2; // Margin around QR code
+  const pad = margin - 3;
   
-  // Elegant Border - thin sleek frame with shadow
+  // Elegant Border - thin sleek frame
   if (frameType === "elegant-border") {
-    ctx.shadowColor = "rgba(0,0,0,0.2)";
-    ctx.shadowBlur = 8;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 2;
     ctx.strokeStyle = frameColor;
     ctx.lineWidth = 2;
     ctx.strokeRect(pad, pad, w - pad*2, h - pad*2);
-    ctx.shadowColor = "transparent";
   }
   
-  // Corner Accent - decorative corner ornaments
+  // Corner Accent - L-shaped decorative corners
   else if (frameType === "corner-accent") {
-    const cornerSize = 12;
-    const corners = [
-      [pad, pad], [w-pad, pad], [w-pad, h-pad], [pad, h-pad]
-    ];
-    
+    const cornerSize = 16;
     ctx.strokeStyle = frameColor;
-    ctx.lineWidth = 2;
-    corners.forEach(([x, y]) => {
-      ctx.beginPath();
-      if (x === pad && y === pad) {
-        ctx.moveTo(x, y + cornerSize);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x + cornerSize, y);
-      } else if (x === w-pad && y === pad) {
-        ctx.moveTo(x - cornerSize, y);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x, y + cornerSize);
-      } else if (x === w-pad && y === h-pad) {
-        ctx.moveTo(x, y - cornerSize);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x - cornerSize, y);
-      } else {
-        ctx.moveTo(x + cornerSize, y);
-        ctx.lineTo(x, y);
-        ctx.lineTo(x, y - cornerSize);
-      }
-      ctx.stroke();
-    });
+    ctx.lineWidth = 2.5;
+    
+    // Top-left
+    ctx.beginPath();
+    ctx.moveTo(pad, pad + cornerSize);
+    ctx.lineTo(pad, pad);
+    ctx.lineTo(pad + cornerSize, pad);
+    ctx.stroke();
+    
+    // Top-right
+    ctx.beginPath();
+    ctx.moveTo(w - pad - cornerSize, pad);
+    ctx.lineTo(w - pad, pad);
+    ctx.lineTo(w - pad, pad + cornerSize);
+    ctx.stroke();
+    
+    // Bottom-right
+    ctx.beginPath();
+    ctx.moveTo(w - pad, h - pad - cornerSize);
+    ctx.lineTo(w - pad, h - pad);
+    ctx.lineTo(w - pad - cornerSize, h - pad);
+    ctx.stroke();
+    
+    // Bottom-left
+    ctx.beginPath();
+    ctx.moveTo(pad + cornerSize, h - pad);
+    ctx.lineTo(pad, h - pad);
+    ctx.lineTo(pad, h - pad - cornerSize);
+    ctx.stroke();
   }
   
-  // Gradient Frame - smooth color gradient
+  // Gradient Frame - smooth color gradient borders
   else if (frameType === "gradient-frame") {
     const gradient = ctx.createLinearGradient(pad, pad, w-pad, h-pad);
     gradient.addColorStop(0, frameColor);
@@ -291,31 +290,34 @@ function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: 
     gradient.addColorStop(1, frameColor);
     
     ctx.fillStyle = gradient;
-    ctx.fillRect(pad, pad, w - pad*2, 4);
-    ctx.fillRect(pad, pad, 4, h - pad*2);
-    ctx.fillRect(pad + w - pad*2 - 4, pad, 4, h - pad*2);
-    ctx.fillRect(pad, h - pad*2 - 4, w - pad*2, 4);
+    // Top border
+    ctx.fillRect(pad, pad, w - pad*2, 5);
+    // Bottom border
+    ctx.fillRect(pad, h - pad - 5, w - pad*2, 5);
+    // Left border
+    ctx.fillRect(pad, pad, 5, h - pad*2);
+    // Right border
+    ctx.fillRect(w - pad - 5, pad, 5, h - pad*2);
   }
   
   // Thick Bold - strong professional frame
   else if (frameType === "thick-bold") {
     ctx.fillStyle = frameColor;
-    ctx.fillRect(pad, pad, w - pad*2, 6);
-    ctx.fillRect(pad, h - pad - 6, w - pad*2, 6);
-    ctx.fillRect(pad, pad, 6, h - pad*2);
-    ctx.fillRect(w - pad - 6, pad, 6, h - pad*2);
-    
-    // Inner accent line
-    ctx.strokeStyle = adjustColor(frameColor, 30);
-    ctx.lineWidth = 1;
-    ctx.strokeRect(pad + 8, pad + 8, w - pad*2 - 16, h - pad*2 - 16);
+    const thickness = 7;
+    // Top
+    ctx.fillRect(pad, pad, w - pad*2, thickness);
+    // Bottom
+    ctx.fillRect(pad, h - pad - thickness, w - pad*2, thickness);
+    // Left
+    ctx.fillRect(pad, pad, thickness, h - pad*2);
+    // Right
+    ctx.fillRect(w - pad - thickness, pad, thickness, h - pad*2);
   }
   
   // Neon Glow - glowing border effect
   else if (frameType === "neon-glow") {
-    // Outer glow
     ctx.shadowColor = frameColor;
-    ctx.shadowBlur = 12;
+    ctx.shadowBlur = 10;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     
@@ -327,13 +329,13 @@ function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: 
     ctx.shadowColor = "transparent";
     ctx.strokeStyle = adjustColor(frameColor, 40);
     ctx.lineWidth = 1;
-    ctx.strokeRect(pad + 2, pad + 2, w - pad*2 - 4, h - pad*2 - 4);
+    ctx.strokeRect(pad + 3, pad + 3, w - pad*2 - 6, h - pad*2 - 6);
   }
   
   // Wave Border - wavy edge frame
   else if (frameType === "wave-border") {
-    const waveHeight = 3;
-    const waveWidth = 4;
+    const waveHeight = 2;
+    const waveWidth = 5;
     
     ctx.strokeStyle = frameColor;
     ctx.lineWidth = 2;
@@ -371,17 +373,6 @@ function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: 
     ctx.strokeStyle = adjustColor(frameColor, -15);
     ctx.lineWidth = 1;
     ctx.strokeRect(pad + 5, pad + 5, w - pad*2 - 10, h - pad*2 - 10);
-    
-    // Decorative dots in corners
-    ctx.fillStyle = frameColor;
-    const corners = [
-      [pad+8, pad+8], [w-pad-8, pad+8], [w-pad-8, h-pad-8], [pad+8, h-pad-8]
-    ];
-    corners.forEach(([x, y]) => {
-      ctx.beginPath();
-      ctx.arc(x, y, 1.5, 0, Math.PI*2);
-      ctx.fill();
-    });
   }
 }
 
@@ -414,6 +405,16 @@ const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: an
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
+    // Determine canvas and QR size based on frame
+    const hasFrame = frame && frame !== "none";
+    const canvasSize = hasFrame ? 290 : 256;
+    const qrSize = hasFrame ? 220 : 256;
+    const qrOffset = hasFrame ? 35 : 0;
+    
+    // Update canvas size
+    canvas.width = canvasSize;
+    canvas.height = canvasSize;
+    
     // Parse hex color to RGB
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -425,16 +426,16 @@ const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: an
     qrImg.onload = () => {
       // Draw background color
       ctx.fillStyle = bgColor || "#fff";
-      ctx.fillRect(0, 0, 256, 256);
+      ctx.fillRect(0, 0, canvasSize, canvasSize);
       
       // Draw and recolor QR code FIRST
       const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 256;
-      tempCanvas.height = 256;
+      tempCanvas.width = qrSize;
+      tempCanvas.height = qrSize;
       const tempCtx = tempCanvas.getContext("2d");
       if (tempCtx) {
-        tempCtx.drawImage(qrImg, 0, 0, 256, 256);
-        const imageData = tempCtx.getImageData(0, 0, 256, 256);
+        tempCtx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+        const imageData = tempCtx.getImageData(0, 0, qrSize, qrSize);
         const pixelData = imageData.data;
         
         // Get RGB values for custom QR color
@@ -456,26 +457,30 @@ const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: an
         }
         
         tempCtx.putImageData(imageData, 0, 0);
-        ctx.drawImage(tempCanvas, 0, 0, 256, 256);
+        ctx.drawImage(tempCanvas, qrOffset, qrOffset, qrSize, qrSize);
       } else {
-        ctx.drawImage(qrImg, 0, 0, 256, 256);
+        ctx.drawImage(qrImg, qrOffset, qrOffset, qrSize, qrSize);
       }
       
       // Draw frame on TOP after QR code
-      if (frame !== "none") {
-        drawFrame(ctx, frame, 256, frameColor);
+      if (hasFrame) {
+        drawFrame(ctx, frame, canvasSize, frameColor, qrSize);
       }
     };
   }, [qrData, frame, frameColor, qrColor, bgColor]);
   
+  const hasFrame = frame && frame !== "none";
+  const displaySize = hasFrame ? 290 : 256;
+  const containerSize = hasFrame ? 320 : 280;
+  
   return (
-    <div style={{ width:280, height:280, background:"#f5f8ff", borderRadius:22, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:qrData?"0 12px 56px rgba(21,101,192,.22)":"0 8px 44px rgba(21,101,192,.1)", border:`1.5px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
+    <div style={{ width:containerSize, height:containerSize, background:"#f5f8ff", borderRadius:22, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:qrData?"0 12px 56px rgba(21,101,192,.22)":"0 8px 44px rgba(21,101,192,.1)", border:`1.5px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
       {qrData ? (
         <canvas 
           data-preview-canvas 
-          width={256} 
-          height={256} 
-          style={{ width:256, height:256, borderRadius:14, display:"block" }} 
+          width={displaySize} 
+          height={displaySize} 
+          style={{ width:displaySize, height:displaySize, borderRadius:14, display:"block" }} 
         />
       ) : (
         <div style={{ textAlign:"center", padding:24 }}>
@@ -554,9 +559,16 @@ export default function App() {
 
   function download() {
     if (!qrData) return;
+    
+    // Determine canvas and QR size based on frame
+    const hasFrame = tab === "url" && frame && frame !== "none";
+    const canvasSize = hasFrame ? 290 : 256;
+    const qrSize = hasFrame ? 220 : 256;
+    const qrOffset = hasFrame ? 35 : 0;
+    
     const canvas = document.createElement("canvas"); 
-    canvas.width = 256; 
-    canvas.height = 256;
+    canvas.width = canvasSize; 
+    canvas.height = canvasSize;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
@@ -571,16 +583,16 @@ export default function App() {
     qrImg.onload = () => {
       // Step 1: Draw background color
       ctx.fillStyle = bgColor || "#fff";
-      ctx.fillRect(0, 0, 256, 256);
+      ctx.fillRect(0, 0, canvasSize, canvasSize);
       
       // Step 2: Draw and recolor QR code FIRST
       const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = 256;
-      tempCanvas.height = 256;
+      tempCanvas.width = qrSize;
+      tempCanvas.height = qrSize;
       const tempCtx = tempCanvas.getContext("2d");
       if (tempCtx) {
-        tempCtx.drawImage(qrImg, 0, 0, 256, 256);
-        const imageData = tempCtx.getImageData(0, 0, 256, 256);
+        tempCtx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+        const imageData = tempCtx.getImageData(0, 0, qrSize, qrSize);
         const data = imageData.data;
         
         // Get RGB values for custom QR color
@@ -602,14 +614,14 @@ export default function App() {
         }
         
         tempCtx.putImageData(imageData, 0, 0);
-        ctx.drawImage(tempCanvas, 0, 0, 256, 256);
+        ctx.drawImage(tempCanvas, qrOffset, qrOffset, qrSize, qrSize);
       } else {
-        ctx.drawImage(qrImg, 0, 0, 256, 256);
+        ctx.drawImage(qrImg, qrOffset, qrOffset, qrSize, qrSize);
       }
       
       // Step 3: Draw frame on TOP after QR code
-      if (tab === "url" && frame !== "none") {
-        drawFrame(ctx, frame, 256, frameColor);
+      if (hasFrame) {
+        drawFrame(ctx, frame, canvasSize, frameColor, qrSize);
       }
       
       // Step 4: Draw logo if present
@@ -617,7 +629,7 @@ export default function App() {
         const logoImg = new Image(); 
         logoImg.src = logo;
         logoImg.onload = () => {
-          const lx = 256/2 - 24, ly = 256/2 - 24;
+          const lx = canvasSize/2 - 24, ly = canvasSize/2 - 24;
           ctx.fillStyle = "#fff"; 
           ctx.roundRect(lx - 4, ly - 4, 56, 56, 8); 
           ctx.fill();
