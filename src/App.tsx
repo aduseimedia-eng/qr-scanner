@@ -211,6 +211,75 @@ const TABS = [
   { id:"wifi",    ico:"📶", lbl:"Wi-Fi" },
   { id:"email",   ico:"✉️", lbl:"Email" },
 ];
+
+// Frame designs
+const FRAMES = [
+  { id:"none", name:"No Frame", icon:"◯" },
+  { id:"circle", name:"Gradient Circle", icon:"⭕" },
+  { id:"square", name:"Modern Square", icon:"⬜" },
+  { id:"diamond", name:"Diamond", icon:"◇" },
+  { id:"rounded", name:"Soft Rounded", icon:"🟧" },
+  { id:"business", name:"Professional", icon:"⬛" },
+];
+
+function drawFrame(ctx: any, frameType: string, size: number = 256) {
+  if (frameType === "none") return;
+  
+  const w = size, h = size;
+  const pad = 8;
+  const x = pad, y = pad, fw = w - pad*2, fh = h - pad*2;
+  
+  if (frameType === "circle") {
+    const gradient = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, w/2);
+    gradient.addColorStop(0, "#1a3a8f");
+    gradient.addColorStop(1, "#1565c0");
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(w/2, h/2, w/2 - pad, 0, Math.PI*2);
+    ctx.fill();
+  } else if (frameType === "square") {
+    const gradient = ctx.createLinearGradient(0, 0, w, h);
+    gradient.addColorStop(0, "#0f2560");
+    gradient.addColorStop(1, "#1a3a8f");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, fw, fh);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(x+3, y+3, fw-6, fh-6);
+  } else if (frameType === "diamond") {
+    ctx.fillStyle = "#1a3a8f";
+    ctx.beginPath();
+    ctx.moveTo(w/2, y);
+    ctx.lineTo(w-y, h/2);
+    ctx.lineTo(w/2, h-y);
+    ctx.lineTo(y, h/2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath();
+    ctx.moveTo(w/2, y+5);
+    ctx.lineTo(w-y-5, h/2);
+    ctx.lineTo(w/2, h-y-5);
+    ctx.lineTo(y+5, h/2);
+    ctx.closePath();
+    ctx.fill();
+  } else if (frameType === "rounded") {
+    ctx.fillStyle = "rgba(26, 58, 143, 0.15)";
+    ctx.roundRect(x, y, fw, fh, 16);
+    ctx.fill();
+    ctx.strokeStyle = "#1a3a8f";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  } else if (frameType === "business") {
+    ctx.fillStyle = "#0f2560";
+    ctx.fillRect(x, y, fw, fh);
+    for (let i = 0; i < 4; i++) {
+      ctx.strokeStyle = "#1565c0";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x+i*2, y+i*2, fw-i*4, fh-i*4);
+    }
+  }
+}
+
 const FEATS = [
   { ico:"⚡", bg:"#eef2ff", t:"Instant Preview",   d:"QR regenerates live with every keystroke." },
   { ico:"🔒", bg:"#e8f4ff", t:"Private & Secure",  d:"All processing is local. Nothing is sent anywhere." },
@@ -222,10 +291,55 @@ const FEATS = [
 
 // Tag component removed (unused in this version)
 
+const PreviewCanvas = ({ qrData, frame, data }: any) => {
+  useEffect(() => {
+    if (!qrData) return;
+    const canvas = document.querySelector("[data-preview-canvas]") as HTMLCanvasElement;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    const qrImg = new Image();
+    qrImg.src = qrData;
+    qrImg.onload = () => {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, 256, 256);
+      
+      if (frame !== "none") {
+        drawFrame(ctx, frame, 256);
+      }
+      
+      ctx.drawImage(qrImg, 0, 0, 256, 256);
+    };
+  }, [qrData, frame]);
+  
+  return (
+    <div style={{ width:280, height:280, background:"#f5f8ff", borderRadius:22, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:qrData?"0 12px 56px rgba(21,101,192,.22)":"0 8px 44px rgba(21,101,192,.1)", border:`1.5px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
+      {qrData ? (
+        <canvas 
+          data-preview-canvas 
+          width={256} 
+          height={256} 
+          style={{ width:256, height:256, borderRadius:14, display:"block" }} 
+        />
+      ) : (
+        <div style={{ textAlign:"center", padding:24 }}>
+          <div style={{ fontSize:52, opacity:.18, marginBottom:12 }}>▦</div>
+          <p style={{ fontSize:".83rem", color:C.muted, maxWidth:160, lineHeight:1.55 }}>
+            {data ? "Generating…" : "Fill in the form to generate your QR code"}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
   const [tab, setTab] = useState("url");
   const [urlV,  setUrlV]  = useState("");
   const [logo,  setLogo]  = useState("");
+  const [frame, setFrame]  = useState("none");
   const [txtV,  setTxtV]  = useState("");
   const [cFn,   setCFn]   = useState(""); const [cLn,  setCLn]  = useState("");
   const [cPh,   setCPh]   = useState(""); const [cEm,  setCEm]  = useState("");
@@ -283,24 +397,33 @@ export default function App() {
 
   function download() {
     if (!qrData) return;
-    if (!logo || tab !== "url") {
-      const a = document.createElement("a"); a.download="adusei-media-qr.png"; a.href=qrData; a.click(); return;
-    }
-    // Merge logo onto QR
     const canvas = document.createElement("canvas"); canvas.width=256; canvas.height=256;
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
     const qrImg = new Image(); qrImg.src = qrData;
     qrImg.onload = () => {
-      if (!ctx) return;
+      // Draw frame background first
+      if (tab === "url" && frame !== "none") {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, 256, 256);
+        drawFrame(ctx, frame, 256);
+      }
+      
       ctx.drawImage(qrImg, 0, 0, 256, 256);
-      const logoImg = new Image(); logoImg.src = logo;
-      logoImg.onload = () => {
-        const lx=256/2-24, ly=256/2-24;
-        if (!ctx) return;
-        ctx.fillStyle="#fff"; ctx.roundRect(lx-4,ly-4,56,56,8); ctx.fill();
-        ctx.drawImage(logoImg, lx, ly, 48, 48);
+      
+      // Draw logo if present
+      if (logo && tab === "url") {
+        const logoImg = new Image(); logoImg.src = logo;
+        logoImg.onload = () => {
+          const lx=256/2-24, ly=256/2-24;
+          ctx.fillStyle="#fff"; ctx.roundRect(lx-4,ly-4,56,56,8); ctx.fill();
+          ctx.drawImage(logoImg, lx, ly, 48, 48);
+          const a=document.createElement("a"); a.download="adusei-media-qr.png"; a.href=canvas.toDataURL("image/png"); a.click();
+        };
+      } else {
         const a=document.createElement("a"); a.download="adusei-media-qr.png"; a.href=canvas.toDataURL("image/png"); a.click();
-      };
+      }
     };
   }
 
@@ -401,6 +524,21 @@ export default function App() {
                     Remove Logo
                   </button>
                 )}
+
+                <Fld label="QR Frame Design">
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+                    {FRAMES.map(f=>(
+                      <button key={f.id} onClick={()=>setFrame(f.id)} style={{
+                        padding:"12px 10px", borderRadius:10, border:`2px solid ${frame===f.id?C.blue:C.border}`,
+                        background:frame===f.id?C.lighter:"#fff", color:C.navy, cursor:"pointer", fontFamily:"inherit",
+                        fontSize:".78rem", fontWeight:frame===f.id?700:500, transition:"all .2s"
+                      }}>
+                        <div style={{ fontSize:"1.4rem", marginBottom:4 }}>{f.icon}</div>
+                        {f.name}
+                      </button>
+                    ))}
+                  </div>
+                </Fld>
               </>}
 
               {tab==="text" &&
@@ -446,17 +584,7 @@ export default function App() {
             <div style={{ padding:38, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:`linear-gradient(160deg,${C.lighter},#eef2ff)` }}>
               <p style={{ fontSize:".74rem", fontWeight:700, color:C.muted, textTransform:"uppercase", letterSpacing:".09em", marginBottom:20 }}>Your QR Code</p>
 
-              <div style={{ width:280, height:280, background:"#fff", borderRadius:22, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:qrData?"0 12px 56px rgba(21,101,192,.22)":"0 8px 44px rgba(21,101,192,.1)", border:`1.5px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
-                {qrData
-                  ? <img src={qrData} alt="QR Code" style={{ width:256, height:256, borderRadius:14, display:"block" }}/>
-                  : <div style={{ textAlign:"center", padding:24 }}>
-                      <div style={{ fontSize:52, opacity:.18, marginBottom:12 }}>▦</div>
-                      <p style={{ fontSize:".83rem", color:C.muted, maxWidth:160, lineHeight:1.55 }}>
-                        {data ? "Generating…" : "Fill in the form to generate your QR code"}
-                      </p>
-                    </div>
-                }
-              </div>
+              <PreviewCanvas qrData={qrData} frame={tab==="url"?frame:"none"} data={data} />
 
               {qrData && <p style={{ fontSize:".78rem", color:C.muted, marginTop:14, marginBottom:4 }}>Scan with any QR reader</p>}
               {qrData && (
