@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import logoImg from "../public/logo.png";
 
 // ============================================
 // CONSTANTS & CONFIG
@@ -650,7 +651,7 @@ export default function App() {
       {/* NAV */}
       <nav style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 6%", height:66, background:"#fff", borderBottom:`1.5px solid ${C.border}`, position:"sticky", top:0, zIndex:200, boxShadow:"0 2px 18px rgba(21,101,192,.08)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:800, fontSize:"1.1rem" }}>
-          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" style={{ width:36, height:36, borderRadius:10, flexShrink:0, objectFit:"contain" }} />
+          <img src={logoImg} alt="Logo" style={{ width:36, height:36, borderRadius:10, flexShrink:0, objectFit:"contain" }} />
           My QR Generator
         </div>
         <div style={{ display:"flex", gap:22, alignItems:"center" }}>
@@ -896,7 +897,7 @@ export default function App() {
       <footer style={{ background:"#0d1f52", padding:"32px 6%" }}>
         <div style={{ maxWidth:1060, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:800, fontSize:"1rem", color:"#fff" }}>
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" style={{ width:32, height:32, borderRadius:9, flexShrink:0, objectFit:"contain" }} />
+            <img src={logoImg} alt="Logo" style={{ width:32, height:32, borderRadius:9, flexShrink:0, objectFit:"contain" }} />
             My QR Generator
             <span style={{ color:"rgba(255,255,255,.4)", fontWeight:400, fontSize:".84rem", marginLeft:4 }}>by Adusei Media</span>
           </div>
