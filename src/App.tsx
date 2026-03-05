@@ -427,12 +427,7 @@ const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: an
       ctx.fillStyle = bgColor || "#fff";
       ctx.fillRect(0, 0, 256, 256);
       
-      // Draw frame with custom color
-      if (frame !== "none") {
-        drawFrame(ctx, frame, 256, frameColor);
-      }
-      
-      // Draw and recolor QR code
+      // Draw and recolor QR code FIRST
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = 256;
       tempCanvas.height = 256;
@@ -464,6 +459,11 @@ const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: an
         ctx.drawImage(tempCanvas, 0, 0, 256, 256);
       } else {
         ctx.drawImage(qrImg, 0, 0, 256, 256);
+      }
+      
+      // Draw frame on TOP after QR code
+      if (frame !== "none") {
+        drawFrame(ctx, frame, 256, frameColor);
       }
     };
   }, [qrData, frame, frameColor, qrColor, bgColor]);
@@ -573,13 +573,7 @@ export default function App() {
       ctx.fillStyle = bgColor || "#fff";
       ctx.fillRect(0, 0, 256, 256);
       
-      // Step 2: Draw frame with custom frame color (if applicable)
-      if (tab === "url" && frame !== "none") {
-        drawFrame(ctx, frame, 256, frameColor);
-      }
-      
-      // Step 3: Draw and recolor QR code
-      // Create temporary canvas to get QR image data
+      // Step 2: Draw and recolor QR code FIRST
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = 256;
       tempCanvas.height = 256;
@@ -611,6 +605,11 @@ export default function App() {
         ctx.drawImage(tempCanvas, 0, 0, 256, 256);
       } else {
         ctx.drawImage(qrImg, 0, 0, 256, 256);
+      }
+      
+      // Step 3: Draw frame on TOP after QR code
+      if (tab === "url" && frame !== "none") {
+        drawFrame(ctx, frame, 256, frameColor);
       }
       
       // Step 4: Draw logo if present
