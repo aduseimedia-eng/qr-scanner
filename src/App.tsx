@@ -619,21 +619,26 @@ export default function App() {
         ctx.drawImage(qrImg, qrOffset, qrOffset, qrSize, qrSize);
       }
       
-      // Step 3: Draw frame on TOP after QR code
+      // Step 3: Draw frame on TOP after QR code (but NOT over logo area)
       if (hasFrame) {
         drawFrame(ctx, frame, canvasSize, frameColor, qrSize);
       }
       
-      // Step 4: Draw logo if present
+      // Step 4: Draw logo if present - COMPLETELY INDEPENDENT of frame color
       if (logo && tab === "url") {
         const logoImg = new Image(); 
         logoImg.src = logo;
         logoImg.onload = () => {
+          // Logo is always centered with white background, unaffected by frame or QR colors
           const lx = canvasSize/2 - 24, ly = canvasSize/2 - 24;
+          // White background for logo (independent of bgColor or frameColor)
           ctx.fillStyle = "#fff"; 
           ctx.roundRect(lx - 4, ly - 4, 56, 56, 8); 
           ctx.fill();
+          // Draw logo image without any color tinting
+          ctx.globalCompositeOperation = "source-over";
           ctx.drawImage(logoImg, lx, ly, 48, 48);
+          ctx.globalCompositeOperation = "source-over";
           triggerDownload(canvas);
         };
       } else {
