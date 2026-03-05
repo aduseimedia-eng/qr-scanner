@@ -212,7 +212,7 @@ const TABS = [
   { id:"email",   ico:"✉️", lbl:"Email" },
 ];
 
-// Frame designs
+// Frame designs - myqrcode.com style
 const FRAMES = [
   { id:"none", name:"No Frame", icon:"◯" },
   { id:"circle", name:"Gradient Circle", icon:"⭕" },
@@ -220,9 +220,19 @@ const FRAMES = [
   { id:"diamond", name:"Diamond", icon:"◇" },
   { id:"rounded", name:"Soft Rounded", icon:"🟧" },
   { id:"business", name:"Professional", icon:"⬛" },
+  { id:"rounded-thick", name:"Thick Border", icon:"⬛" },
+  { id:"frame-split", name:"Split Frame", icon:"▦" },
 ];
 
-function drawFrame(ctx: any, frameType: string, size: number = 256) {
+// Patterns for future enhancement
+// const PATTERNS = [
+//   { id:"none", name:"Solid", icon:"▮" },
+//   { id:"dots", name:"Dots", icon:"⚫" },
+//   { id:"lines", name:"Lines", icon:"▬" },
+//   { id:"gradient", name:"Gradient", icon:"⛅" },
+// ];
+
+function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: string = "#1a3a8f") {
   if (frameType === "none") return;
   
   const w = size, h = size;
@@ -231,22 +241,19 @@ function drawFrame(ctx: any, frameType: string, size: number = 256) {
   
   if (frameType === "circle") {
     const gradient = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, w/2);
-    gradient.addColorStop(0, "#1a3a8f");
-    gradient.addColorStop(1, "#1565c0");
+    gradient.addColorStop(0, frameColor);
+    gradient.addColorStop(1, adjustColor(frameColor, 30));
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.arc(w/2, h/2, w/2 - pad, 0, Math.PI*2);
     ctx.fill();
   } else if (frameType === "square") {
-    const gradient = ctx.createLinearGradient(0, 0, w, h);
-    gradient.addColorStop(0, "#0f2560");
-    gradient.addColorStop(1, "#1a3a8f");
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = frameColor;
     ctx.fillRect(x, y, fw, fh);
     ctx.fillStyle = "#fff";
     ctx.fillRect(x+3, y+3, fw-6, fh-6);
   } else if (frameType === "diamond") {
-    ctx.fillStyle = "#1a3a8f";
+    ctx.fillStyle = frameColor;
     ctx.beginPath();
     ctx.moveTo(w/2, y);
     ctx.lineTo(w-y, h/2);
@@ -263,21 +270,43 @@ function drawFrame(ctx: any, frameType: string, size: number = 256) {
     ctx.closePath();
     ctx.fill();
   } else if (frameType === "rounded") {
-    ctx.fillStyle = "rgba(26, 58, 143, 0.15)";
+    ctx.fillStyle = adjustColor(frameColor, -20);
     ctx.roundRect(x, y, fw, fh, 16);
     ctx.fill();
-    ctx.strokeStyle = "#1a3a8f";
+    ctx.strokeStyle = frameColor;
     ctx.lineWidth = 2;
     ctx.stroke();
   } else if (frameType === "business") {
-    ctx.fillStyle = "#0f2560";
+    ctx.fillStyle = frameColor;
     ctx.fillRect(x, y, fw, fh);
     for (let i = 0; i < 4; i++) {
-      ctx.strokeStyle = "#1565c0";
+      ctx.strokeStyle = adjustColor(frameColor, 20);
       ctx.lineWidth = 1;
       ctx.strokeRect(x+i*2, y+i*2, fw-i*4, fh-i*4);
     }
+  } else if (frameType === "rounded-thick") {
+    ctx.fillStyle = frameColor;
+    ctx.roundRect(x, y, fw, fh, 12);
+    ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.roundRect(x+4, y+4, fw-8, fh-8, 10);
+    ctx.fill();
+  } else if (frameType === "frame-split") {
+    ctx.fillStyle = frameColor;
+    ctx.fillRect(x, y, fw, 4);
+    ctx.fillRect(x, h-y-4, fw, 4);
+    ctx.fillRect(x, y, 4, fh);
+    ctx.fillRect(w-y-4, y, 4, fh);
   }
+}
+
+function adjustColor(color: string, percent: number): string {
+  const num = parseInt(color.replace("#",""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, (num >> 16) + amt);
+  const G = Math.min(255, (num >> 8 & 0x00FF) + amt);
+  const B = Math.min(255, (num & 0x0000FF) + amt);
+  return "#" + (R << 16 | G << 8 | B).toString(16).padStart(6, '0');
 }
 
 const FEATS = [
@@ -291,7 +320,7 @@ const FEATS = [
 
 // Tag component removed (unused in this version)
 
-const PreviewCanvas = ({ qrData, frame, data }: any) => {
+const PreviewCanvas = ({ qrData, frame, data, frameColor, qrColor, bgColor }: any) => {
   useEffect(() => {
     if (!qrData) return;
     const canvas = document.querySelector("[data-preview-canvas]") as HTMLCanvasElement;
@@ -300,19 +329,59 @@ const PreviewCanvas = ({ qrData, frame, data }: any) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
+    // Parse hex color to RGB
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+    };
+    
     const qrImg = new Image();
     qrImg.src = qrData;
     qrImg.onload = () => {
-      ctx.fillStyle = "#fff";
+      // Draw background color
+      ctx.fillStyle = bgColor || "#fff";
       ctx.fillRect(0, 0, 256, 256);
       
+      // Draw frame with custom color
       if (frame !== "none") {
-        drawFrame(ctx, frame, 256);
+        drawFrame(ctx, frame, 256, frameColor);
       }
       
-      ctx.drawImage(qrImg, 0, 0, 256, 256);
+      // Draw and recolor QR code
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 256;
+      tempCanvas.height = 256;
+      const tempCtx = tempCanvas.getContext("2d");
+      if (tempCtx) {
+        tempCtx.drawImage(qrImg, 0, 0, 256, 256);
+        const imageData = tempCtx.getImageData(0, 0, 256, 256);
+        const pixelData = imageData.data;
+        
+        // Get RGB values for custom QR color
+        const [qrR, qrG, qrB] = hexToRgb(qrColor);
+        
+        // Recolor dark pixels to custom QR color
+        for (let i = 0; i < pixelData.length; i += 4) {
+          const r = pixelData[i];
+          const g = pixelData[i + 1];
+          const b = pixelData[i + 2];
+          const brightness = (r + g + b) / 3;
+          
+          // If pixel is dark (part of QR pattern), recolor it
+          if (brightness < 128) {
+            pixelData[i] = qrR;
+            pixelData[i + 1] = qrG;
+            pixelData[i + 2] = qrB;
+          }
+        }
+        
+        tempCtx.putImageData(imageData, 0, 0);
+        ctx.drawImage(tempCanvas, 0, 0, 256, 256);
+      } else {
+        ctx.drawImage(qrImg, 0, 0, 256, 256);
+      }
     };
-  }, [qrData, frame]);
+  }, [qrData, frame, frameColor, qrColor, bgColor]);
   
   return (
     <div style={{ width:280, height:280, background:"#f5f8ff", borderRadius:22, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:qrData?"0 12px 56px rgba(21,101,192,.22)":"0 8px 44px rgba(21,101,192,.1)", border:`1.5px solid ${C.border}`, overflow:"hidden", position:"relative" }}>
@@ -340,6 +409,9 @@ export default function App() {
   const [urlV,  setUrlV]  = useState("");
   const [logo,  setLogo]  = useState("");
   const [frame, setFrame]  = useState("none");
+  const [frameColor, setFrameColor] = useState("#1a3a8f");
+  const [qrColor, setQrColor] = useState("#0f2560");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [txtV,  setTxtV]  = useState("");
   const [cFn,   setCFn]   = useState(""); const [cLn,  setCLn]  = useState("");
   const [cPh,   setCPh]   = useState(""); const [cEm,  setCEm]  = useState("");
@@ -397,34 +469,88 @@ export default function App() {
 
   function download() {
     if (!qrData) return;
-    const canvas = document.createElement("canvas"); canvas.width=256; canvas.height=256;
+    const canvas = document.createElement("canvas"); 
+    canvas.width = 256; 
+    canvas.height = 256;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    const qrImg = new Image(); qrImg.src = qrData;
+    // Parse hex color to RGB
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 0, 0];
+    };
+    
+    const qrImg = new Image(); 
+    qrImg.src = qrData;
     qrImg.onload = () => {
-      // Draw frame background first
+      // Step 1: Draw background color
+      ctx.fillStyle = bgColor || "#fff";
+      ctx.fillRect(0, 0, 256, 256);
+      
+      // Step 2: Draw frame with custom frame color (if applicable)
       if (tab === "url" && frame !== "none") {
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, 256, 256);
-        drawFrame(ctx, frame, 256);
+        drawFrame(ctx, frame, 256, frameColor);
       }
       
-      ctx.drawImage(qrImg, 0, 0, 256, 256);
+      // Step 3: Draw and recolor QR code
+      // Create temporary canvas to get QR image data
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = 256;
+      tempCanvas.height = 256;
+      const tempCtx = tempCanvas.getContext("2d");
+      if (tempCtx) {
+        tempCtx.drawImage(qrImg, 0, 0, 256, 256);
+        const imageData = tempCtx.getImageData(0, 0, 256, 256);
+        const data = imageData.data;
+        
+        // Get RGB values for custom QR color
+        const [qrR, qrG, qrB] = hexToRgb(qrColor);
+        
+        // Recolor dark pixels to custom QR color
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const brightness = (r + g + b) / 3;
+          
+          // If pixel is dark (part of QR pattern), recolor it
+          if (brightness < 128) {
+            data[i] = qrR;
+            data[i + 1] = qrG;
+            data[i + 2] = qrB;
+          }
+        }
+        
+        tempCtx.putImageData(imageData, 0, 0);
+        ctx.drawImage(tempCanvas, 0, 0, 256, 256);
+      } else {
+        ctx.drawImage(qrImg, 0, 0, 256, 256);
+      }
       
-      // Draw logo if present
+      // Step 4: Draw logo if present
       if (logo && tab === "url") {
-        const logoImg = new Image(); logoImg.src = logo;
+        const logoImg = new Image(); 
+        logoImg.src = logo;
         logoImg.onload = () => {
-          const lx=256/2-24, ly=256/2-24;
-          ctx.fillStyle="#fff"; ctx.roundRect(lx-4,ly-4,56,56,8); ctx.fill();
+          const lx = 256/2 - 24, ly = 256/2 - 24;
+          ctx.fillStyle = "#fff"; 
+          ctx.roundRect(lx - 4, ly - 4, 56, 56, 8); 
+          ctx.fill();
           ctx.drawImage(logoImg, lx, ly, 48, 48);
-          const a=document.createElement("a"); a.download="adusei-media-qr.png"; a.href=canvas.toDataURL("image/png"); a.click();
+          triggerDownload(canvas);
         };
       } else {
-        const a=document.createElement("a"); a.download="adusei-media-qr.png"; a.href=canvas.toDataURL("image/png"); a.click();
+        triggerDownload(canvas);
       }
     };
+  }
+  
+  function triggerDownload(canvas: HTMLCanvasElement) {
+    const a = document.createElement("a");
+    a.download = "adusei-media-qr.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click();
   }
 
   function copyD() {
@@ -539,6 +665,26 @@ export default function App() {
                     ))}
                   </div>
                 </Fld>
+
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12 }}>
+                  <Fld label="Frame Color">
+                    <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                      <input type="color" value={frameColor} onChange={(e: any)=>setFrameColor(e.target.value)} style={{ width:"100%", height:44, border:`1.5px solid ${C.border}`, borderRadius:10, cursor:"pointer" }} />
+                    </div>
+                  </Fld>
+                  
+                  <Fld label="QR Code Color">
+                    <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                      <input type="color" value={qrColor} onChange={(e: any)=>setQrColor(e.target.value)} style={{ width:"100%", height:44, border:`1.5px solid ${C.border}`, borderRadius:10, cursor:"pointer" }} />
+                    </div>
+                  </Fld>
+                </div>
+
+                <Fld label="Background Color">
+                  <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                    <input type="color" value={bgColor} onChange={(e: any)=>setBgColor(e.target.value)} style={{ width:"100%", height:44, border:`1.5px solid ${C.border}`, borderRadius:10, cursor:"pointer" }} />
+                  </div>
+                </Fld>
               </>}
 
               {tab==="text" &&
@@ -584,7 +730,7 @@ export default function App() {
             <div style={{ padding:38, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:`linear-gradient(160deg,${C.lighter},#eef2ff)` }}>
               <p style={{ fontSize:".74rem", fontWeight:700, color:C.muted, textTransform:"uppercase", letterSpacing:".09em", marginBottom:20 }}>Your QR Code</p>
 
-              <PreviewCanvas qrData={qrData} frame={tab==="url"?frame:"none"} data={data} />
+              <PreviewCanvas qrData={qrData} frame={tab==="url"?frame:"none"} data={data} frameColor={frameColor} qrColor={qrColor} bgColor={bgColor} />
 
               {qrData && <p style={{ fontSize:".78rem", color:C.muted, marginTop:14, marginBottom:4 }}>Scan with any QR reader</p>}
               {qrData && (
