@@ -212,16 +212,16 @@ const TABS = [
   { id:"email",   ico:"✉️", lbl:"Email" },
 ];
 
-// Frame designs - myqrcode.com style
+// Frame designs - Professional myqrcode.com style
 const FRAMES = [
   { id:"none", name:"No Frame", icon:"◯" },
-  { id:"circle", name:"Gradient Circle", icon:"⭕" },
-  { id:"square", name:"Modern Square", icon:"⬜" },
-  { id:"diamond", name:"Diamond", icon:"◇" },
-  { id:"rounded", name:"Soft Rounded", icon:"🟧" },
-  { id:"business", name:"Professional", icon:"⬛" },
-  { id:"rounded-thick", name:"Thick Border", icon:"⬛" },
-  { id:"frame-split", name:"Split Frame", icon:"▦" },
+  { id:"elegant-border", name:"Elegant Border", icon:"⬜" },
+  { id:"corner-accent", name:"Corner Accent", icon:"🎨" },
+  { id:"gradient-frame", name:"Gradient Frame", icon:"🌈" },
+  { id:"thick-bold", name:"Thick Bold", icon:"⬛" },
+  { id:"neon-glow", name:"Neon Glow", icon:"✨" },
+  { id:"wave-border", name:"Wave Border", icon:"〰️" },
+  { id:"double-frame", name:"Double Frame", icon:"▦" },
 ];
 
 // Patterns for future enhancement
@@ -237,66 +237,150 @@ function drawFrame(ctx: any, frameType: string, size: number = 256, frameColor: 
   
   const w = size, h = size;
   const pad = 8;
-  const x = pad, y = pad, fw = w - pad*2, fh = h - pad*2;
   
-  if (frameType === "circle") {
-    const gradient = ctx.createRadialGradient(w/2, h/2, 20, w/2, h/2, w/2);
-    gradient.addColorStop(0, frameColor);
-    gradient.addColorStop(1, adjustColor(frameColor, 30));
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(w/2, h/2, w/2 - pad, 0, Math.PI*2);
-    ctx.fill();
-  } else if (frameType === "square") {
-    ctx.fillStyle = frameColor;
-    ctx.fillRect(x, y, fw, fh);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(x+3, y+3, fw-6, fh-6);
-  } else if (frameType === "diamond") {
-    ctx.fillStyle = frameColor;
-    ctx.beginPath();
-    ctx.moveTo(w/2, y);
-    ctx.lineTo(w-y, h/2);
-    ctx.lineTo(w/2, h-y);
-    ctx.lineTo(y, h/2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.beginPath();
-    ctx.moveTo(w/2, y+5);
-    ctx.lineTo(w-y-5, h/2);
-    ctx.lineTo(w/2, h-y-5);
-    ctx.lineTo(y+5, h/2);
-    ctx.closePath();
-    ctx.fill();
-  } else if (frameType === "rounded") {
-    ctx.fillStyle = adjustColor(frameColor, -20);
-    ctx.roundRect(x, y, fw, fh, 16);
-    ctx.fill();
+  // Elegant Border - thin sleek frame with shadow
+  if (frameType === "elegant-border") {
+    ctx.shadowColor = "rgba(0,0,0,0.2)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
     ctx.strokeStyle = frameColor;
     ctx.lineWidth = 2;
-    ctx.stroke();
-  } else if (frameType === "business") {
+    ctx.strokeRect(pad, pad, w - pad*2, h - pad*2);
+    ctx.shadowColor = "transparent";
+  }
+  
+  // Corner Accent - decorative corner ornaments
+  else if (frameType === "corner-accent") {
+    const cornerSize = 12;
+    const corners = [
+      [pad, pad], [w-pad, pad], [w-pad, h-pad], [pad, h-pad]
+    ];
+    
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = 2;
+    corners.forEach(([x, y]) => {
+      ctx.beginPath();
+      if (x === pad && y === pad) {
+        ctx.moveTo(x, y + cornerSize);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + cornerSize, y);
+      } else if (x === w-pad && y === pad) {
+        ctx.moveTo(x - cornerSize, y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y + cornerSize);
+      } else if (x === w-pad && y === h-pad) {
+        ctx.moveTo(x, y - cornerSize);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x - cornerSize, y);
+      } else {
+        ctx.moveTo(x + cornerSize, y);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x, y - cornerSize);
+      }
+      ctx.stroke();
+    });
+  }
+  
+  // Gradient Frame - smooth color gradient
+  else if (frameType === "gradient-frame") {
+    const gradient = ctx.createLinearGradient(pad, pad, w-pad, h-pad);
+    gradient.addColorStop(0, frameColor);
+    gradient.addColorStop(0.5, adjustColor(frameColor, 20));
+    gradient.addColorStop(1, frameColor);
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(pad, pad, w - pad*2, 4);
+    ctx.fillRect(pad, pad, 4, h - pad*2);
+    ctx.fillRect(pad + w - pad*2 - 4, pad, 4, h - pad*2);
+    ctx.fillRect(pad, h - pad*2 - 4, w - pad*2, 4);
+  }
+  
+  // Thick Bold - strong professional frame
+  else if (frameType === "thick-bold") {
     ctx.fillStyle = frameColor;
-    ctx.fillRect(x, y, fw, fh);
-    for (let i = 0; i < 4; i++) {
-      ctx.strokeStyle = adjustColor(frameColor, 20);
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x+i*2, y+i*2, fw-i*4, fh-i*4);
+    ctx.fillRect(pad, pad, w - pad*2, 6);
+    ctx.fillRect(pad, h - pad - 6, w - pad*2, 6);
+    ctx.fillRect(pad, pad, 6, h - pad*2);
+    ctx.fillRect(w - pad - 6, pad, 6, h - pad*2);
+    
+    // Inner accent line
+    ctx.strokeStyle = adjustColor(frameColor, 30);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad + 8, pad + 8, w - pad*2 - 16, h - pad*2 - 16);
+  }
+  
+  // Neon Glow - glowing border effect
+  else if (frameType === "neon-glow") {
+    // Outer glow
+    ctx.shadowColor = frameColor;
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(pad, pad, w - pad*2, h - pad*2);
+    
+    // Inner bright line
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = adjustColor(frameColor, 40);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad + 2, pad + 2, w - pad*2 - 4, h - pad*2 - 4);
+  }
+  
+  // Wave Border - wavy edge frame
+  else if (frameType === "wave-border") {
+    const waveHeight = 3;
+    const waveWidth = 4;
+    
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    // Top
+    for (let x = pad; x < w - pad; x += waveWidth) {
+      ctx.lineTo(x, pad + Math.sin(x / waveWidth) * waveHeight);
     }
-  } else if (frameType === "rounded-thick") {
+    // Right
+    for (let y = pad; y < h - pad; y += waveWidth) {
+      ctx.lineTo(w - pad + Math.sin(y / waveWidth) * waveHeight, y);
+    }
+    // Bottom
+    for (let x = w - pad; x > pad; x -= waveWidth) {
+      ctx.lineTo(x, h - pad + Math.sin(x / waveWidth) * waveHeight);
+    }
+    // Left
+    for (let y = h - pad; y > pad; y -= waveWidth) {
+      ctx.lineTo(pad + Math.sin(y / waveWidth) * waveHeight, y);
+    }
+    
+    ctx.closePath();
+    ctx.stroke();
+  }
+  
+  // Double Frame - nested elegant borders
+  else if (frameType === "double-frame") {
+    // Outer frame
+    ctx.strokeStyle = frameColor;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pad, pad, w - pad*2, h - pad*2);
+    
+    // Inner frame
+    ctx.strokeStyle = adjustColor(frameColor, -15);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad + 5, pad + 5, w - pad*2 - 10, h - pad*2 - 10);
+    
+    // Decorative dots in corners
     ctx.fillStyle = frameColor;
-    ctx.roundRect(x, y, fw, fh, 12);
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.roundRect(x+4, y+4, fw-8, fh-8, 10);
-    ctx.fill();
-  } else if (frameType === "frame-split") {
-    ctx.fillStyle = frameColor;
-    ctx.fillRect(x, y, fw, 4);
-    ctx.fillRect(x, h-y-4, fw, 4);
-    ctx.fillRect(x, y, 4, fh);
-    ctx.fillRect(w-y-4, y, 4, fh);
+    const corners = [
+      [pad+8, pad+8], [w-pad-8, pad+8], [w-pad-8, h-pad-8], [pad+8, h-pad-8]
+    ];
+    corners.forEach(([x, y]) => {
+      ctx.beginPath();
+      ctx.arc(x, y, 1.5, 0, Math.PI*2);
+      ctx.fill();
+    });
   }
 }
 
