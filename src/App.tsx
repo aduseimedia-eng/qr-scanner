@@ -686,11 +686,20 @@ export default function App() {
 
   const sc = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior:"smooth" });
 
+  // Detect mobile
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", background:"#fff", color:C.navy, minHeight:"100vh" }}>
+    <div style={{ fontFamily:"'Segoe UI',system-ui,sans-serif", background:"#fff", color:C.navy, minHeight:"100vh", WebkitTouchCallout:"none" }}>
 
       {/* NAV */}
-      <nav style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 6%", height:"auto", background:"#fff", borderBottom:`1.5px solid ${C.border}`, position:"sticky", top:0, zIndex:200, boxShadow:"0 2px 18px rgba(21,101,192,.08)" }}>
+      <nav style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:`0 ${isMobile?3:6}%`, height:"auto", background:"#fff", borderBottom:`1.5px solid ${C.border}`, position:"sticky", top:0, zIndex:200, boxShadow:"0 2px 18px rgba(21,101,192,.08)", flexWrap:isMobile?"wrap":"nowrap", gap:isMobile?8:22 }}>
         <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:800, fontSize:"1.1rem" }}>
           <img src={logoImg} alt="Logo" style={{ width:100, height:100, borderRadius:10, flexShrink:0, objectFit:"contain" }} />
           My QR Generator
@@ -703,7 +712,7 @@ export default function App() {
       </nav>
 
       {/* HERO */}
-      <div style={{ textAlign:"center", padding:"96px 6% 72px", background:"linear-gradient(175deg,#eef2ff 0%,#f8faff 55%,#fff 100%)" }}>
+      <div style={{ textAlign:"center", padding:`${isMobile ? 36 : 96}px ${isMobile?3:6}% ${isMobile ? 48 : 72}px`, background:"linear-gradient(175deg,#eef2ff 0%,#f8faff 55%,#fff 100%)" }}>
         <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:C.lt, border:`1px solid ${C.border}`, borderRadius:50, padding:"7px 20px", fontSize:".8rem", color:C.mid, marginBottom:28, fontWeight:700 }}>
           <span style={{ width:8, height:8, borderRadius:"50%", background:C.blue, display:"inline-block" }} />
           100% Free · No Sign-up · Instant
@@ -731,23 +740,23 @@ export default function App() {
       </div>
 
       {/* GENERATOR */}
-      <div id="generator" style={{ padding:"0 6% 90px" }}>
+      <div id="generator" style={{ padding:`0 ${isMobile?3:6}% ${isMobile ? 54 : 90}px` }}>
         <div style={{ maxWidth:1060, margin:"0 auto", background:"#fff", border:`1.5px solid ${C.border}`, borderRadius:24, overflow:"hidden", boxShadow:"0 16px 70px rgba(21,101,192,.12)" }}>
 
           {/* Tabs */}
-          <div style={{ display:"flex", borderBottom:`1.5px solid ${C.border}`, overflowX:"auto", background:C.lighter }}>
+          <div style={{ display:"flex", borderBottom:`1.5px solid ${C.border}`, overflowX:"auto", background:C.lighter, WebkitOverflowScrolling:"touch" }}>
             {TABS.map(t=>(
               <button key={t.id} onClick={()=>setTab(t.id)}
-                style={{ display:"flex", alignItems:"center", gap:7, padding:"15px 22px", fontSize:".88rem", fontWeight:600, color:tab===t.id?C.blue:C.muted, cursor:"pointer", background:"none", border:"none", borderBottom:tab===t.id?`2.5px solid ${C.blue}`:"2.5px solid transparent", whiteSpace:"nowrap", fontFamily:"inherit", transition:"all .2s" }}>
+                style={{ display:"flex", alignItems:"center", gap:7, padding:`${isMobile?"10px 12px":"15px 22px"}`, fontSize:isMobile?".75rem":".88rem", fontWeight:600, color:tab===t.id?C.blue:C.muted, cursor:"pointer", background:"none", border:"none", borderBottom:tab===t.id?`2.5px solid ${C.blue}`:"2.5px solid transparent", whiteSpace:"nowrap", fontFamily:"inherit", transition:"all .2s", flexShrink:0 }}>
                 {t.ico} {t.lbl}
               </button>
             ))}
           </div>
 
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr" }}>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"1fr 1fr", gap:0 }}>
 
             {/* LEFT */}
-            <div style={{ padding:38, borderRight:`1.5px solid ${C.border}` }}>
+            <div style={{ padding:isMobile?20:38, borderRight:isMobile?"none":`1.5px solid ${C.border}` }}>
 
               {tab==="url" && <>
                 <Inp label="Website URL" value={urlV} onChange={(e: any)=>setUrlV(e.target.value)} placeholder="https://adusemedia.com"/>
@@ -853,7 +862,7 @@ export default function App() {
             </div>
 
             {/* RIGHT */}
-            <div style={{ padding:38, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:`linear-gradient(160deg,${C.lighter},#eef2ff)` }}>
+            <div style={{ padding:isMobile?20:38, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", background:`linear-gradient(160deg,${C.lighter},#eef2ff)`, borderTop:isMobile?`1.5px solid ${C.border}`:"none" }}>
               <p style={{ fontSize:".74rem", fontWeight:700, color:C.muted, textTransform:"uppercase", letterSpacing:".09em", marginBottom:20 }}>Your QR Code</p>
 
               <PreviewCanvas qrData={qrData} frame={tab==="url"?frame:"none"} data={data} frameColor={frameColor} qrColor={qrColor} bgColor={bgColor} />
@@ -875,8 +884,8 @@ export default function App() {
       </div>
 
       {/* STATS */}
-      <div style={{ padding:"0 6% 80px" }}>
-        <div style={{ maxWidth:1060, margin:"0 auto", background:C.grad, borderRadius:22, padding:"38px 48px", display:"flex", justifyContent:"space-around", flexWrap:"wrap", gap:24 }}>
+      <div style={{ padding:`0 ${isMobile?3:6}% ${isMobile?48:80}px` }}>
+        <div style={{ maxWidth:1060, margin:"0 auto", background:C.grad, borderRadius:22, padding:isMobile?"24px 20px":"38px 48px", display:"flex", justifyContent:"space-around", flexWrap:"wrap", gap:isMobile?12:24 }}>
           {[["5","QR Types"],["100%","Free"],["Instant","Preview"],["PNG","Export"]].map(([n,l])=>(
             <div key={l} style={{ textAlign:"center" }}>
               <div style={{ fontSize:"2rem", fontWeight:900, color:"#fff" }}>{n}</div>
@@ -887,10 +896,10 @@ export default function App() {
       </div>
 
       {/* HOW IT WORKS */}
-      <div id="how" style={{ padding:"80px 6%", background:C.lighter }}>
+      <div id="how" style={{ padding:`${isMobile?48:80}px ${isMobile?3:6}%`, background:C.lighter }}>
         <div style={{ maxWidth:1060, margin:"0 auto" }}>
-          <p style={{ color:C.muted, marginBottom:48, fontSize:".97rem" }}>No account, no watermark, no hassle. Just enter your content and download.</p>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))", gap:22 }}>
+          <p style={{ color:C.muted, marginBottom:isMobile?24:48, fontSize:isMobile?".9rem":".97rem" }}>No account, no watermark, no hassle. Just enter your content and download.</p>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(240px,1fr))", gap:isMobile?12:22 }}>
             {[
               ["1","✏️","Choose your content type","Pick URL, text, vCard, Wi-Fi, or email. Select the tab that matches what you want to share."],
               ["2","⚡","Fill in and preview instantly","Type into the fields. Your QR code generates live, no button needed."],
@@ -908,10 +917,10 @@ export default function App() {
       </div>
 
       {/* FEATURES */}
-      <div id="features" style={{ padding:"80px 6%", background:"#fff" }}>
+      <div id="features" style={{ padding:`${isMobile?48:80}px ${isMobile?3:6}%`, background:"#fff" }}>
         <div style={{ maxWidth:1060, margin:"0 auto" }}>
-          <p style={{ color:C.muted, marginBottom:48, fontSize:".97rem" }}>Built by Adusei Media for professionals and everyday users.</p>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(290px,1fr))", gap:22 }}>
+          <p style={{ color:C.muted, marginBottom:isMobile?24:48, fontSize:isMobile?".9rem":".97rem" }}>Built by Adusei Media for professionals and everyday users.</p>
+          <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr":"repeat(auto-fit,minmax(290px,1fr))", gap:isMobile?12:22 }}>
             {FEATS.map(f=>(
               <div key={f.t} style={{ background:"#fff", border:`1.5px solid ${C.border}`, borderRadius:18, padding:"28px 26px", boxShadow:"0 4px 22px rgba(21,101,192,.06)" }}>
                 <div style={{ width:48, height:48, borderRadius:14, background:f.bg, display:"grid", placeItems:"center", fontSize:22, marginBottom:18 }}>{f.ico}</div>
@@ -924,25 +933,27 @@ export default function App() {
       </div>
 
       {/* CTA */}
-      <div style={{ padding:"0 6% 80px", background:C.lighter }}>
-        <div style={{ maxWidth:1060, margin:"0 auto", background:C.grad, borderRadius:26, padding:"64px 48px", textAlign:"center", boxShadow:"0 16px 60px rgba(21,101,192,.25)" }}>
-          <h2 style={{ fontSize:"clamp(1.6rem,3.5vw,2.5rem)", fontWeight:900, color:"#fff", marginBottom:14 }}>Ready to create your QR code?</h2>
-          <p style={{ color:"rgba(255,255,255,.68)", marginBottom:36, fontSize:"1.02rem" }}>No account needed. Free forever. Designed by Adusei Media.</p>
-          <button onClick={()=>sc("generator")} style={{ background:"#fff", color:C.navy, border:"none", padding:"15px 38px", borderRadius:50, fontWeight:800, fontSize:"1rem", cursor:"pointer", fontFamily:"inherit" }}>
+      <div style={{ padding:`0 ${isMobile?3:6}% ${isMobile?48:80}px`, background:C.lighter }}>
+        <div style={{ maxWidth:1060, margin:"0 auto", background:C.grad, borderRadius:26, padding:isMobile?"32px 16px":"64px 48px", textAlign:"center", boxShadow:"0 16px 60px rgba(21,101,192,.25)" }}>
+          <h2 style={{ fontSize:isMobile?"clamp(1.3rem,3vw,1.8rem)":"clamp(1.6rem,3.5vw,2.5rem)", fontWeight:900, color:"#fff", marginBottom:isMobile?10:14 }}>Ready to create your QR code?</h2>
+          <p style={{ color:"rgba(255,255,255,.68)", marginBottom:isMobile?20:36, fontSize:isMobile?".95rem":"1.02rem" }}>No account needed. Free forever. Designed by Adusei Media.</p>
+          <button onClick={()=>sc("generator")} style={{ background:"#fff", color:C.navy, border:"none", padding:isMobile?"12px 28px":"15px 38px", borderRadius:50, fontWeight:800, fontSize:isMobile?".9rem":"1rem", cursor:"pointer", fontFamily:"inherit" }}>
             Create Free QR Code
           </button>
         </div>
       </div>
 
       {/* FOOTER */}
-      <footer style={{ background:"#0d1f52", padding:"32px 6%" }}>
-        <div style={{ maxWidth:1060, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:16 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:800, fontSize:"1rem", color:"#fff" }}>
-            <img src={logoImg} alt="Logo" style={{ width:100, height:100, borderRadius:9, flexShrink:0, objectFit:"contain" }} />
-            My QR Generator
-            <span style={{ color:"rgba(255,255,255,.4)", fontWeight:400, fontSize:".84rem", marginLeft:4 }}>by Adusei Media</span>
+      <footer style={{ background:"#0d1f52", padding:`${isMobile?16:32}px ${isMobile?3:6}%` }}>
+        <div style={{ maxWidth:1060, margin:"0 auto", display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:isMobile?8:16, flexDirection:isMobile?"column":"row", textAlign:isMobile?"center":"left" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, fontWeight:800, fontSize:isMobile?".9rem":"1rem", color:"#fff", flexDirection:isMobile?"column":"row" }}>
+            <img src={logoImg} alt="Logo" style={{ width:isMobile?64:100, height:isMobile?64:100, borderRadius:9, flexShrink:0, objectFit:"contain" }} />
+            <div>
+              My QR Generator
+              <span style={{ color:"rgba(255,255,255,.4)", fontWeight:400, fontSize:isMobile?".7rem":".84rem", marginLeft:isMobile?0:4, display:isMobile?"block":"inline" }}>{isMobile?"by Adusei":"by Adusei Media"}</span>
+            </div>
           </div>
-          <p style={{ color:"rgba(255,255,255,.35)", fontSize:".8rem" }}>2025 Adusei Media. All rights reserved.</p>
+          <p style={{ color:"rgba(255,255,255,.35)", fontSize:isMobile?".7rem":".8rem" }}>2025 Adusei Media. All rights reserved.</p>
         </div>
       </footer>
     </div>

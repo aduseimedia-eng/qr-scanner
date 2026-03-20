@@ -198,6 +198,260 @@ div[style*="padding: 30px"] {
   will-change: transform, box-shadow;
 }
 
+/* ====== MOBILE RESPONSIVE DESIGN ====== */
+
+/* Tablet and smaller (768px and below) */
+@media (max-width: 768px) {
+  /* Navigation adjustments */
+  nav {
+    padding: 0 4% !important;
+  }
+
+  nav > div:first-child {
+    gap: 8px !important;
+    font-size: 1rem !important;
+  }
+
+  nav > div:first-child img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  nav > div:last-child {
+    gap: 14px !important;
+  }
+
+  nav a {
+    font-size: 0.85rem !important;
+    display: none;
+  }
+
+  nav button {
+    padding: 8px 16px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Use CSS Grid to target generator layout */
+  div[style*="display:grid"] > div:nth-child(1),
+  div[style*="display:grid"] > div:nth-child(2) {
+    border-right: none !important;
+  }
+
+  div[style*="display:grid"][style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Left form section */
+  div[style*="borderRight"] {
+    padding: 24px 20px !important;
+    border-right: none !important;
+  }
+
+  /* Right preview section (after left form) */
+  div[style*="borderRight"] + div {
+    padding: 24px 20px !important;
+    background: linear-gradient(160deg, #eef2ff, #f8faff) !important;
+    border-top: 1.5px solid #d0daff !important;
+  }
+
+  /* Tabs - allow horizontal scroll */
+  div[style*="borderBottom"] {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Tabs responsive */
+  button[style*="whiteSpace"] {
+    padding: 12px 16px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Form container adjustments */
+  section, main, div[role="region"] {
+    padding-left: 4% !important;
+    padding-right: 4% !important;
+  }
+
+  /* Section padding reduction */
+  div[style*="maxWidth: 1060"] {
+    border-radius: 16px !important;
+  }
+
+  /* Footer adjustments */
+  footer {
+    padding: 24px 4% !important;
+  }
+
+  footer > div {
+    flex-direction: column !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  footer img {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  footer p {
+    font-size: 0.75rem !important;
+  }
+
+  /* Smooth transitions for mobile */
+  input:focus, textarea:focus, select:focus {
+    transform: scale(1.01) !important;
+  }
+
+  button:hover {
+    transform: translateY(-1px) !important;
+  }
+}
+
+/* Mobile phones (480px and below) */
+@media (max-width: 480px) {
+  /* Navigation */
+  nav {
+    padding: 0 3% !important;
+    height: auto !important;
+  }
+
+  nav > div:first-child {
+    gap: 6px !important;
+    font-size: 0.9rem !important;
+  }
+
+  nav > div:first-child img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  nav > div:last-child {
+    gap: 8px !important;
+  }
+
+  nav a {
+    display: none !important;
+  }
+
+  nav button {
+    padding: 6px 12px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Hero section */
+  div[style*="textAlign: center"] {
+    padding: 36px 3% !important;
+  }
+
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
+    margin-bottom: 12px !important;
+    line-height: 1.15 !important;
+  }
+
+  div[style*="color: inherit"] p {
+    font-size: 0.9rem !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Generator section stacking */
+  div[style*="gridTemplateColumns"] {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  /* Padding adjustments */
+  div[style*="padding: 38px"],
+  div[style*="padding:38px"] {
+    padding: 16px 12px !important;
+  }
+
+  /* Form labels */
+  label {
+    font-size: 0.65rem !important;
+    margin-bottom: 5px !important;
+  }
+
+  /* Input fields */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  textarea,
+  select {
+    padding: 8px 10px !important;
+    font-size: 0.85rem !important;
+  }
+
+  textarea {
+    min-height: 80px !important;
+  }
+
+  /* Color picker size */
+  input[type="color"] {
+    height: 40px !important;
+  }
+
+  /* Button sizing */
+  button {
+    padding: 10px 20px !important;
+    font-size: 0.8rem !important;
+  }
+
+  button[style*="padding:15px"] {
+    padding: 12px 24px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Footer */
+  footer {
+    padding: 16px 3% !important;
+  }
+
+  footer > div {
+    flex-direction: column !important;
+  }
+
+  footer img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  footer p {
+    font-size: 0.7rem !important;
+  }
+
+  /* Button ripple effect disable on mobile for performance */
+  button::before {
+    display: none;
+  }
+
+  button:active::before {
+    display: none;
+  }
+}
+
+/* Small phones (under 360px) */
+@media (max-width: 360px) {
+  nav > div:first-child img {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  nav > div:first-child {
+    font-size: 0.85rem !important;
+  }
+
+  h1 {
+    font-size: clamp(1.3rem, 3.5vw, 2rem) !important;
+  }
+
+  p {
+    font-size: 0.85rem !important;
+  }
+}
+
 div[style*="padding: 30px"]:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(21, 101, 192, 0.15) !important;
