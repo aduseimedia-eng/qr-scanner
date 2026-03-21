@@ -532,10 +532,20 @@ export default function App() {
     }
     if (tab === "email") {
       const to=eTo.trim(); if (!to) return "";
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(to)) return "";
       const parts=[];
-      if (eSub.trim())  parts.push("subject="+encodeURIComponent(eSub.trim()));
-      if (eBody.trim()) parts.push("body="+encodeURIComponent(eBody.trim()));
-      return "mailto:"+to+(parts.length?"?"+parts.join("&"):"");
+      // Properly encode subject and body
+      if (eSub.trim()) {
+        const subject = eSub.trim().replace(/([?&])/g, (m)=>encodeURIComponent(m));
+        parts.push("subject="+encodeURIComponent(subject));
+      }
+      if (eBody.trim()) {
+        const body = eBody.trim().replace(/([?&])/g, (m)=>encodeURIComponent(m));
+        parts.push("body="+encodeURIComponent(body));
+      }
+      return "mailto:"+encodeURIComponent(to)+(parts.length?"?"+parts.join("&"):"");
     }
     return "";
   }
